@@ -1,0 +1,50 @@
+name: Build Android for Amazon or Google Play
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: "EAS build profile"
+        required: true
+        default: "amazon"
+        type: choice
+        options:
+          - amazon
+          - google-play
+          - preview
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    name: Validate and trigger EAS build
+    runs-on: ubuntu-latest
+    env:
+      EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+      EAS_PROFILE: ${{ inputs.profile }}
+      EXPO_PUBLIC_REVENUECAT_AMAZON_API_KEY: ${{ secrets.EXPO_PUBLIC_REVENUECAT_AMAZON_API_KEY }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install dependencies from lockfile
+        run: pnpm install --frozen-lockfile
+
+      - name: Validate source code
+        run: pnpm run validate:release
+
+      - name: Trigger signed EAS build
+        run: npx eas-cli@latest build --platform android --profile "$EAS_PROFILE" --non-interactive --no-wait
