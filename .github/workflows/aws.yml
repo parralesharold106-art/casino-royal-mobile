@@ -27,7 +27,7 @@
 name: Deploy to Amazon ECS
 
 on:
- push: false
+  push: true
     branches: [ "main" ]
 
       env:
