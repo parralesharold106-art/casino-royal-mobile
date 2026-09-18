@@ -28,7 +28,7 @@ name: Deploy to Amazon ECS
 
 on:
   push: true
-    branches: [ "main" ]
+    branches: [ " main " ]
 
       env:
         AWS_REGION: us-east-1                          # ← Cambiar de "MY_AWS_REGION"
